@@ -226,7 +226,7 @@ echo "Adding Zorin's Package public gpg keys..."
 echo ""
 
 # Manually add the public gpg keys
-if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os.gpg --output "$TEMPD/zorin-os.gpg"; then
+if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os.gpg --output "$TEMPD/zorin-os.gpg"; then
     echo "Error: Failed to download Zorin OS public gpg key."
     exit 1
 fi
@@ -236,7 +236,7 @@ if [ ! -s "$TEMPD/zorin-os.gpg" ]; then
 fi
 
 if [ "$version" = "18" ]; then
-    if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium-18.gpg --output "$TEMPD/zorin-os-premium-18.gpg"; then
+    if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium-18.gpg --output "$TEMPD/zorin-os-premium-18.gpg"; then
         echo "Error: Failed to download premium public gpg key."
         exit 1
     fi
@@ -246,7 +246,7 @@ if [ "$version" = "18" ]; then
     fi
 
 else
-    if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium.gpg --output "$TEMPD/zorin-os-premium.gpg"; then
+    if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium.gpg --output "$TEMPD/zorin-os-premium.gpg"; then
         echo "Error: Failed to download premium public gpg key."
         exit 1
     fi
