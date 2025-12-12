@@ -313,18 +313,18 @@ fi
 # Fix permissions of dummy debs if they exist
 # 555 = rwxr-xr-x
 # See: https://chmod-calculator.com/
-if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ];
+if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ]; then
     sudo chmod 755 "$TEMPD/zorin-os-premium-keyring.deb"
 fi
-if [ -e "$TEMPD/zorin-os-keyring.deb" ];
+if [ -e "$TEMPD/zorin-os-keyring.deb" ]; then
     sudo chmod 755 "$TEMPD/zorin-os-keyring.deb"
 fi
 
 # Install dummy debs if they exist
-if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ];
+if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ]; then
     sudo apt-get install "$TEMPD/zorin-os-premium-keyring.deb"
 fi
-if [ -e "$TEMPD/zorin-os-keyring.deb" ];
+if [ -e "$TEMPD/zorin-os-keyring.deb" ]; then
     sudo apt-get install "$TEMPD/zorin-os-keyring.deb"
 fi
 

@@ -66,7 +66,7 @@ EOF
 ( cd "$WORKDIR" && equivs-build control )
 
 # Move result to requested output directory
-DEB_FILE=$(ls -1 "$WORKDIR"/*.deb | head -n1)
+DEB_FILE=$(find "$WORKDIR" -maxdepth 1 -name "*.deb" -print -quit)
 OUT_FILE="${PKG_NAME}_${PKG_VERSION}_${ARCH}.deb"
 mv "$DEB_FILE" "$OUT_DIR/$OUT_FILE"
 
