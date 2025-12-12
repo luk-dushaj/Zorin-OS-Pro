@@ -33,7 +33,7 @@ echo "  ███╔╝ ██║   ██║██████╔╝██║�
 echo " ███╔╝  ██║   ██║██╔══██╗██║██║╚██╗██║    ██║   ██║╚════██║    ██╔═══╝ ██╔══██╗██║   ██║"
 echo "███████╗╚██████╔╝██║  ██║██║██║ ╚████║    ╚██████╔╝███████║    ██║     ██║  ██║╚██████╔╝"
 echo "╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝     ╚═════╝ ╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝ "
-echo "|ZORIN-OS-PRO| |Script v9.4.1.0| |Overhauled & Maintained By NamelessNanasi/NanashiTheNameless| |original idea by kauancvlcnt|"
+echo "|ZORIN-OS-PRO| |Script v10.0.0.0| |Overhauled & Maintained By NamelessNanasi/NanashiTheNameless| |original idea by kauancvlcnt|"
 echo ""
 echo "(Please note this tool ONLY works on ZorinOS 18 Core, ZorinOS 17 Core, and ZorinOS 16 Core)"
 echo ""
@@ -55,10 +55,10 @@ echo ""
 sleep 8
 
 function fail() {
-        echo ""
-        echo "You are not running this script correctly, read the GitHub https://github.com/NanashiTheNameless/Zorin-OS-Pro/ for more info"
-        echo ""
-        exit 1
+    echo ""
+    echo "You are not running this script correctly, read the GitHub https://github.com/NanashiTheNameless/Zorin-OS-Pro/ for more info"
+    echo ""
+    exit 1
 }
 
 # Parse command line arguments for flag
@@ -102,13 +102,13 @@ echo ""
 echo "Preparing to install dependencies..."
 echo ""
 
-# Install ca-certificates and curl (not strictly necessary)
+# Install ca-certificates and curl (not strictly necessary but safe)
 if ! sudo apt-get update; then
-    echo "Error: Failed to update apt repositories."
+    echo "Non-Blocking Error: Failed to update apt repositories."
     # This should be non-blocking
 fi
 if ! sudo apt-get install ${no_confirm} ca-certificates curl; then
-    echo "Error: Failed to install dependencies."
+    echo "Non-Blocking Error: Failed to install dependencies."
     # This should be non-blocking
 fi
 
@@ -214,93 +214,126 @@ if [ ! -e "$TEMPD" ]; then
     exit 1
 fi
 
+# Set permissions of temp directory
+# 755 = rwxr-xr-x
+# See: https://chmod-calculator.com/
 if [ -e "$TEMPD" ]; then
     sudo chmod 755 "$TEMPD"
 fi
 
 echo ""
-echo "Adding Zorin's Package Keys..."
+echo "Adding Zorin's Package public gpg keys..."
 echo ""
 
-# Manually add the keyrings
-if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' https://ppa.launchpadcontent.net/zorinos/stable/ubuntu/pool/main/z/zorin-os-keyring/zorin-os-keyring_1.1+1_all.deb --output "$TEMPD/zorin-os-keyring_1.1+1_all.deb"; then
-    echo "Error: Failed to download Zorin OS keyring."
+# Manually add the public gpg keys
+if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os.gpg --output "$TEMPD/zorin-os.gpg"; then
+    echo "Error: Failed to download Zorin OS public gpg key."
     exit 1
 fi
-if [ ! -s "$TEMPD/zorin-os-keyring_1.1+1_all.deb" ]; then
-    echo "Error: Downloaded Zorin OS keyring file is empty or missing."
+if [ ! -s "$TEMPD/zorin-os.gpg" ]; then
+    echo "Error: Downloaded Zorin OS public gpg key file is empty or missing."
     exit 1
 fi
 
 if [ "$version" = "18" ]; then
-    if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' -A 'Zorin OS Premium' https://packages.zorinos.com/premium/pool/main/z/zorin-os-premium-keyring/zorin-os-premium-keyring_1.1_all.deb --output "$TEMPD/zorin-os-premium-keyring_all.deb"; then
-        echo "Error: Failed to download premium keyring."
-        # exit 1
+    if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium-18.gpg --output "$TEMPD/zorin-os-premium-18.gpg"; then
+        echo "Error: Failed to download premium public gpg key."
+        exit 1
     fi
-    if [ ! -s "$TEMPD/zorin-os-premium-keyring_all.deb" ]; then
-        echo "Error: Downloaded premium keyring file is empty or missing."
-        # exit 1
+    if [ ! -s "$TEMPD/zorin-os-premium-18.gpg" ]; then
+        echo "Error: Downloaded premium public gpg key file is empty or missing."
+        exit 1
     fi
-
-# Temporary hack-fix
-    # Create the directory if it doesn't exist
-    sudo mkdir -p /etc/apt/trusted.gpg.d
-
-    # Retrieve the key from a trusted keyserver (Ubuntu’s hkps pool)
-    gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys F67720BE68E7EEE742FA62F35FD7496A07D323BC
-
-    # Export and save it to the system trusted keyring directory
-    gpg --export F67720BE68E7EEE742FA62F35FD7496A07D323BC | sudo tee /etc/apt/trusted.gpg.d/zorin-os-premium.gpg > /dev/null
-
-    # Verify that it was saved correctly
-    sudo gpg --show-keys /etc/apt/trusted.gpg.d/zorin-os-premium.gpg
 
 else
-    if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' -A 'Zorin OS Premium' https://packages.zorinos.com/premium/pool/main/z/zorin-os-premium-keyring/zorin-os-premium-keyring_1.0_all.deb --output "$TEMPD/zorin-os-premium-keyring_all.deb"; then
-        echo "Error: Failed to download premium keyring."
-        # exit 1
+    if ! curl -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium.gpg --output "$TEMPD/zorin-os-premium.gpg"; then
+        echo "Error: Failed to download premium public gpg key."
+        exit 1
     fi
-    if [ ! -s "$TEMPD/zorin-os-premium-keyring_all.deb" ]; then
-        echo "Error: Downloaded premium keyring file is empty or missing."
-        # exit 1
+    if [ ! -s "$TEMPD/zorin-os-premium.gpg" ]; then
+        echo "Error: Downloaded premium public gpg key file is empty or missing."
+        exit 1
     fi
-
-# Temporary hack-fix
-    # Create the directory if it doesn't exist
-    sudo mkdir -p /etc/apt/trusted.gpg.d
-
-    # Retrieve the key from a trusted keyserver (Ubuntu’s hkps pool)
-    gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys F67720BE68E7EEE742FA62F35FD7496A07D323BC
-
-    # Export and save it to the system trusted keyring directory
-    gpg --export F67720BE68E7EEE742FA62F35FD7496A07D323BC | sudo tee /etc/apt/trusted.gpg.d/zorin-os-premium.gpg > /dev/null
-
-    # Verify that it was saved correctly
-    sudo gpg --show-keys /etc/apt/trusted.gpg.d/zorin-os-premium.gpg
-
 fi
 
-# Fix permissions of manually downloaded keyrings
-sudo chmod 644 "$TEMPD/zorin-os-keyring_1.1+1_all.deb"
-# THis is broken ATM because of ZorinOS's packaging, so we skip it for now
-# sudo chmod 644 "$TEMPD/zorin-os-premium-keyring_all.deb"
-
-if ! sudo apt --no-install-recommends install ${no_confirm} "$TEMPD/zorin-os-keyring_1.1+1_all.deb"; then
-    echo "Error: Failed to install Zorin OS keyring."
-    # This should be non-blocking
+# Fix permissions of manually downloaded public gpg keys
+# 644 = -rw-r--r--
+# See: https://chmod-calculator.com/
+sudo chmod 644 "$TEMPD/zorin-os.gpg"
+if [ "$version" = "18" ]; then
+    sudo chmod 644 "$TEMPD/zorin-os-premium-18.gpg"
+else
+    sudo chmod 644 "$TEMPD/zorin-os-premium.gpg"
 fi
 
-if ! sudo apt --no-install-recommends install ${no_confirm} "$TEMPD/zorin-os-premium-keyring_all.deb"; then
-    echo "Error: Failed to install premium keyring."
-    # exit 1
+# Move public gpg keys to trusted.gpg.d
+sudo cp --no-clobber "$TEMPD/zorin-os.gpg" "/etc/apt/trusted.gpg.d/zorin-os.gpg" # --no-clobber to avoid overwriting existing keys
+if [ "$version" = "18" ]; then
+    sudo cp --no-clobber "$TEMPD/zorin-os-premium-18.gpg" "/etc/apt/trusted.gpg.d/zorin-os-premium-18.gpg" # --no-clobber to avoid overwriting existing keys
+else
+    sudo cp --no-clobber "$TEMPD/zorin-os-premium.gpg" "/etc/apt/trusted.gpg.d/zorin-os-premium.gpg" # --no-clobber to avoid overwriting existing keys
+fi
+
+# Fix ownership of public gpg keys
+sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os.gpg
+if [ "$version" = "18" ]; then
+    sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os-premium-18.gpg
+else
+    sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os-premium.gpg
 fi
 
 echo ""
-echo "Done adding Zorin's Package Keys..."
+echo "Done adding ZorinOS's Public gpg keys..."
 echo ""
 
 echo ""
-echo "Adding premium flags..."
+echo "Now making and creating & installing dummy debs to satify dependencies for zorin-os-premium-keyring (if needed)..."
+echo ""
+
+if dpkg -s "zorin-os-premium-keyring" >/dev/null 2>&1; then
+    echo ""
+    echo "zorin-os-premium-keyring is already installed, skipping dummy deb creation/installation."
+    echo ""
+else
+    if [ "$version" = "18" ]; then
+        bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-premium-keyring -v 1.1 -o "$TEMPD/zorin-os-premium-keyring.deb"
+    else
+        bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-premium-keyring -v 1.0 -o "$TEMPD/zorin-os-premium-keyring.deb"
+    fi
+fi
+
+if dpkg -s "zorin-os-keyring" >/dev/null 2>&1; then
+    echo ""
+    echo "zorin-os-keyring is already installed, skipping dummy deb creation/installation."
+    echo ""
+else
+    bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-keyring -v 1.1 -o "$TEMPD/zorin-os-keyring.deb"
+fi
+
+# Fix permissions of dummy debs if they exist
+# 555 = rwxr-xr-x
+# See: https://chmod-calculator.com/
+if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ];
+    sudo chmod 755 "$TEMPD/zorin-os-premium-keyring.deb"
+fi
+if [ -e "$TEMPD/zorin-os-keyring.deb" ];
+    sudo chmod 755 "$TEMPD/zorin-os-keyring.deb"
+fi
+
+# Install dummy debs if they exist
+if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ];
+    sudo apt-get install "$TEMPD/zorin-os-premium-keyring.deb"
+fi
+if [ -e "$TEMPD/zorin-os-keyring.deb" ];
+    sudo apt-get install "$TEMPD/zorin-os-keyring.deb"
+fi
+
+echo ""
+echo "Done installing dummy debs if needed..."
+echo ""
+
+echo ""
+echo "Adding premium flag..."
 echo ""
 
 # Introduce premium user agent
@@ -315,11 +348,11 @@ Acquire
 EOF
 
 echo ""
-echo "Done adding premium flags..."
+echo "Done adding premium flag..."
 echo ""
 
 echo ""
-echo "Adding premium content..."
+echo "Adding premium content from the official apt repo..."
 echo ""
 
 # Update packages
@@ -329,7 +362,7 @@ if ! sudo apt-get update; then
 fi
 
 if [ "$version" = "16" ]; then
-    # install 16 pro content
+    # Install 16 pro content
     if [ "$extra" = "true" ]; then
         if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
             echo "Error: Failed to install APT packages. (16 Extra)"
@@ -346,7 +379,7 @@ if [ "$version" = "16" ]; then
         fi
     fi
 elif [ "$version" = "17" ]; then
-    # install 17 pro content
+    # Install 17 pro content
     if [ "$extra" = "true" ]; then
         if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-pro-wallpapers-17 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-os-wallpapers-17 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
             echo "Error: Failed to install APT packages. (17 extra)"
@@ -363,7 +396,7 @@ elif [ "$version" = "17" ]; then
         fi
     fi
 elif [ "$version" = "18" ]; then
-    # install 18 pro content
+    # Install 18 pro content
     if [ "$extra" = "true" ]; then
         if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-pro-wallpapers-17 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-os-wallpapers-17 zorin-os-wallpapers-18 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
             echo "Error: Failed to install packages. (18 extra)"
@@ -388,24 +421,21 @@ echo "Removing you from the ZorinOS Census system (if enrolled)..."
 echo ""
 
 if ! sudo apt purge ${no_confirm} zorin-os-census ; then
-    echo "Error: APT failed to uninstall zorin-os-census"
+    echo "Non-Blocking Error: APT failed to uninstall zorin-os-census"
+    echo "(This is not an issue, You may not have been enrolled in the census system in the first place)"
     # This should be non-blocking
 fi
 
 if ! sudo rm -f /root/etc/cron.daily/zorin-os-census /root/etc/cron.hourly/zorin-os-census ; then
-    echo "Error: Failed to delete ZorinOS Census cron tasks \"/root/etc/cron.daily/zorin-os-census\" and \"/root/etc/cron.hourly/zorin-os-census\""
+    echo "Non-Blocking Error: Failed to delete ZorinOS Census cron tasks \"/root/etc/cron.daily/zorin-os-census\" and \"/root/etc/cron.hourly/zorin-os-census\""
+    echo "(This is not an issue, You may not have been enrolled in the census system in the first place)"
     # This should be non-blocking
 fi
 
 echo ""
 echo ""
 echo "All done!"
-if [ "$version" = "18" ]; then
-    echo ""
-    echo "ZorinOS 18 Core support is only partially confirmed. Your system may need to be rebooted multiple times and first boot(s) may take longer than normal."
-    echo ""
-    echo "If you have any questions or comments please see https://github.com/NanashiTheNameless/Zorin-OS-Pro/discussions/29 for more information on how to deal with them."
-fi
+echo "If you have any questions or comments please see https://github.com/NanashiTheNameless/Zorin-OS-Pro/discussions/29 for more information on how to deal with them."
 echo ""
 echo "If you are using this tool and have issues please file a bug report about said issues on GitHub https://github.com/NanashiTheNameless/Zorin-OS-Pro/issues/new?template=bug_report.yml"
 echo ""

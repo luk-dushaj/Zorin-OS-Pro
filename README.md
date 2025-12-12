@@ -1,7 +1,5 @@
 # Zorin-OS-Pro [![Shellcheck](https://img.shields.io/github/actions/workflow/status/NanashiTheNameless/Zorin-OS-Pro/shellcheck.yml?branch=main&label=Shellcheck&style=for-the-badge&labelColor=0d1117)](https://github.com/NanashiTheNameless/Zorin-OS-Pro/actions/workflows/shellcheck.yml)
 
-# This is KNOWN BROKEN at this time, As a result I am disabling Issues and Discussions until I can fix it.
-
 ## This script turns your Zorin OS CORE instance into a Zorin OS PRO instance!
 
 ## [If you like the OS please consider supporting the original devs by buying a genuine copy!](<https://zorin.com/os/why-pay/>)
@@ -31,24 +29,6 @@ bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNamel
 ```sh
 bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/zorin.sh) -X
 ```
-
-## If you face issues with the "zorin-os-premium-keyring" package try installing the deb manually using this command.
-
-##### Zorin 16/17
-
-```sh
-curl -H 'DNT: 1' -H 'Sec-GPC: 1' -A 'Zorin OS Premium' https://packages.zorinos.com/premium/pool/main/z/zorin-os-premium-keyring/zorin-os-premium-keyring_1.0_all.deb --output zorin-os-premium-keyring_1.0_all.deb
-sudo apt install ./zorin-os-premium-keyring_1.0_all.deb
-```
-
-##### Zorin 18
-
-```sh
-curl -H 'DNT: 1' -H 'Sec-GPC: 1' -A 'Zorin OS Premium' https://packages.zorinos.com/premium/pool/main/z/zorin-os-premium-keyring/zorin-os-premium-keyring_1.1_all.deb --output zorin-os-premium-keyring_1.1_all.deb
-sudo apt install ./zorin-os-premium-keyring_1.1_all.deb
-```
-
-It should be okay to ignore further errors.
 
 # Examples
 
