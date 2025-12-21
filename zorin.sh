@@ -368,10 +368,13 @@ if [ "$version" = "16" ]; then
             echo "Error: Failed to install APT packages. (16 Extra)"
             exit 1
         fi
-        if ! flatpak install flathub ${no_confirm} org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.pitivi.Pitivi org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender; then
-            echo "Error: Failed to install Flatpak packages. (16 Extra)"
-            exit 1
-        fi
+        # Install flatpak packages individually to allow user to choose which to install
+        flatpak_packages_16="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.pitivi.Pitivi org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
+        for package in $flatpak_packages_16; do
+            if ! flatpak install flathub ${no_confirm} "$package"; then
+                echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
+            fi
+        done
     else
         if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-wallpapers zorin-os-wallpapers-16; then
             echo "Error: Failed to install APT packages. (16)"
@@ -385,10 +388,13 @@ elif [ "$version" = "17" ]; then
             echo "Error: Failed to install APT packages. (17 extra)"
             exit 1
         fi
-        if ! flatpak install flathub ${no_confirm} org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender; then
-            echo "Error: Failed to install Flatpak packages. (17 extra)"
-            exit 1
-        fi
+        # Install flatpak packages individually to allow user to choose which to install
+        flatpak_packages_17="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
+        for package in $flatpak_packages_17; do
+            if ! flatpak install flathub ${no_confirm} "$package"; then
+                echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
+            fi
+        done
     else
         if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-pro-wallpapers-17 zorin-os-wallpapers zorin-os-wallpapers-17; then
             echo "Error: Failed to install packages. (17)"
@@ -402,10 +408,13 @@ elif [ "$version" = "18" ]; then
             echo "Error: Failed to install packages. (18 extra)"
             exit 1
         fi
-        if ! flatpak install flathub ${no_confirm} org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender; then
-            echo "Error: Failed to install Flatpak packages. (17 extra)"
-            exit 1
-        fi
+        # Install flatpak packages individually to allow user to choose which to install
+        flatpak_packages_18="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
+        for package in $flatpak_packages_18; do
+            if ! flatpak install flathub ${no_confirm} "$package"; then
+                echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
+            fi
+        done
     else
         if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-wallpapers zorin-os-wallpapers-18; then
             echo "Error: Failed to install packages. (18)"
