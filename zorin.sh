@@ -23,8 +23,8 @@ fi
 
 # Check if running on Zorin OS
 if ! grep -q "Zorin OS" /etc/os-release; then
-    echo "Error: This script only supports Zorin OS."
-    exit 1
+  echo "Error: This script only supports Zorin OS."
+  exit 1
 fi
 
 echo "███████╗ ██████╗ ██████╗ ██╗███╗   ██╗     ██████╗ ███████╗    ██████╗ ██████╗  ██████╗ "
@@ -55,10 +55,10 @@ echo ""
 sleep 8
 
 function fail() {
-    echo ""
-    echo "You are not running this script correctly, read the GitHub https://github.com/NanashiTheNameless/Zorin-OS-Pro/ for more info"
-    echo ""
-    exit 1
+  echo ""
+  echo "You are not running this script correctly, read the GitHub https://github.com/NanashiTheNameless/Zorin-OS-Pro/ for more info"
+  echo ""
+  exit 1
 }
 
 # Parse command line arguments for flag
@@ -66,36 +66,36 @@ no_confirm=""
 extra="false"
 while getopts "678XU" opt; do
   case $opt in
-    6) version="16" ;;
-    7) version="17" ;;
-    8) version="18" ;;
-    X) extra="true" ;;
-    U) no_confirm="-y" ;;
-    *) fail ;;
+  6) version="16" ;;
+  7) version="17" ;;
+  8) version="18" ;;
+  X) extra="true" ;;
+  U) no_confirm="-y" ;;
+  *) fail ;;
   esac
 done
 
 # Automatic version detection if no flag provided
-if [ -z ${version+x} ] ; then
-    if grep -q "Zorin OS" /etc/os-release; then
-        version_id=$(grep VERSION_ID /etc/os-release | cut -d '"' -f2 | cut -d '.' -f1)
-        case "$version_id" in
-            16) version="16" ;;
-            17) version="17" ;;
-            18) version="18" ;;
-            *) fail ;;
-        esac
-    else
-        fail
-    fi
-    auto_version="true"
+if [ -z ${version+x} ]; then
+  if grep -q "Zorin OS" /etc/os-release; then
+    version_id=$(grep VERSION_ID /etc/os-release | cut -d '"' -f2 | cut -d '.' -f1)
+    case "$version_id" in
+    16) version="16" ;;
+    17) version="17" ;;
+    18) version="18" ;;
+    *) fail ;;
+    esac
+  else
+    fail
+  fi
+  auto_version="true"
 fi
 
 if [ "$auto_version" = "true" ]; then
-    echo ""
-    echo "ZorinOS $version automatically selected. if this is not correct please stop the script with \"CTRL+C\" and re-run the script with the correct version flag."
-    echo ""
-    sleep 5
+  echo ""
+  echo "ZorinOS $version automatically selected. if this is not correct please stop the script with \"CTRL+C\" and re-run the script with the correct version flag."
+  echo ""
+  sleep 5
 fi
 
 echo ""
@@ -104,12 +104,12 @@ echo ""
 
 # Install ca-certificates and curl (not strictly necessary but safe)
 if ! sudo apt-get update; then
-    echo "Non-Blocking Error: Failed to update apt repositories."
-    # This should be non-blocking
+  echo "Non-Blocking Error: Failed to update apt repositories."
+  # This should be non-blocking
 fi
 if ! sudo apt-get install ${no_confirm} ca-certificates curl; then
-    echo "Non-Blocking Error: Failed to install dependencies."
-    # This should be non-blocking
+  echo "Non-Blocking Error: Failed to install dependencies."
+  # This should be non-blocking
 fi
 
 echo ""
@@ -120,84 +120,38 @@ echo ""
 echo "Updating the default sources.list for Zorin's custom resources..."
 echo ""
 
-function AddSources16() {
-sudo cp -f /etc/apt/sources.list.d/zorin.list /etc/apt/sources.list.d/zorin.list.bak 2>/dev/null || true
-sudo rm -f /etc/apt/sources.list.d/zorin.list
-sudo touch /etc/apt/sources.list.d/zorin.list
-sudo tee /etc/apt/sources.list.d/zorin.list > /dev/null << 'EOF'
-deb https://packages.zorinos.com/stable focal main
-deb-src https://packages.zorinos.com/stable focal main
+function AddSources() {
+  codename="$1"
+  zorin_list='/etc/apt/sources.list.d/zorin.list'
+  packages_url='https://packages.zorinos.com'
+  packages=('stable' 'patches' 'apps' 'drivers' 'premium')
 
-deb https://packages.zorinos.com/patches focal main
-deb-src https://packages.zorinos.com/patches focal main
+  sudo cp -f "$zorin_list" "$zorin_list.bak" 2>/dev/null || true
+  sudo rm -f "$zorin_list"
+  sudo touch "$zorin_list"
 
-deb https://packages.zorinos.com/apps focal main
-deb-src https://packages.zorinos.com/apps focal main
-
-deb https://packages.zorinos.com/drivers focal main restricted
-deb-src https://packages.zorinos.com/drivers focal main restricted
-
-deb https://packages.zorinos.com/premium focal main
-deb-src https://packages.zorinos.com/premium focal main
-
+  for package in "${packages[@]}"; do
+    sudo tee -a "$zorin_list" >/dev/null <<EOF
+deb $packages_url/$package $codename main
+deb-src $packages_url/$package $codename main
 EOF
+  done
 }
 
-function AddSources17() {
-sudo cp -f /etc/apt/sources.list.d/zorin.list /etc/apt/sources.list.d/zorin.list.bak 2>/dev/null || true
-sudo rm -f /etc/apt/sources.list.d/zorin.list
-sudo touch /etc/apt/sources.list.d/zorin.list
-sudo tee /etc/apt/sources.list.d/zorin.list > /dev/null << 'EOF'
-deb https://packages.zorinos.com/stable jammy main
-deb-src https://packages.zorinos.com/stable jammy main
-
-deb https://packages.zorinos.com/patches jammy main
-deb-src https://packages.zorinos.com/patches jammy main
-
-deb https://packages.zorinos.com/apps jammy main
-deb-src https://packages.zorinos.com/apps jammy main
-
-deb https://packages.zorinos.com/drivers jammy main restricted
-deb-src https://packages.zorinos.com/drivers jammy main restricted
-
-deb https://packages.zorinos.com/premium jammy main
-deb-src https://packages.zorinos.com/premium jammy main
-
-EOF
-}
-
-function AddSources18() {
-sudo cp -f /etc/apt/sources.list.d/zorin.list /etc/apt/sources.list.d/zorin.list.bak 2>/dev/null || true
-sudo rm -f /etc/apt/sources.list.d/zorin.list
-sudo touch /etc/apt/sources.list.d/zorin.list
-sudo tee /etc/apt/sources.list.d/zorin.list > /dev/null << 'EOF'
-deb https://packages.zorinos.com/stable noble main
-deb-src https://packages.zorinos.com/stable noble main
-
-deb https://packages.zorinos.com/patches noble main
-deb-src https://packages.zorinos.com/patches noble main
-
-deb https://packages.zorinos.com/apps noble main
-deb-src https://packages.zorinos.com/apps noble main
-
-deb https://packages.zorinos.com/drivers noble main restricted
-deb-src https://packages.zorinos.com/drivers noble main restricted
-
-deb https://packages.zorinos.com/premium noble main
-deb-src https://packages.zorinos.com/premium noble main
-
-EOF
-}
-
-if [ "$version" = "16" ]; then
-    AddSources16
-elif [ "$version" = "17" ]; then
-    AddSources17
-elif [ "$version" = "18" ]; then
-    AddSources18
-else
-    fail
-fi
+case "$version" in
+"16")
+  AddSources "focal"
+  ;;
+"17")
+  AddSources "jammy"
+  ;;
+"18")
+  AddSources "noble"
+  ;;
+*)
+  fail
+  ;;
+esac
 
 echo ""
 echo "Done updating the default sources.list for Zorin's custom resources..."
@@ -210,15 +164,15 @@ TEMPD=$(mktemp -d)
 
 # Exit if the temp directory wasn't created successfully.
 if [ ! -e "$TEMPD" ]; then
-    >&2 echo "Failed to create temp directory"
-    exit 1
+  >&2 echo "Failed to create temp directory"
+  exit 1
 fi
 
 # Set permissions of temp directory
 # 755 = rwxr-xr-x
 # See: https://chmod-calculator.com/
 if [ -e "$TEMPD" ]; then
-    sudo chmod 755 "$TEMPD"
+  sudo chmod 755 "$TEMPD"
 fi
 
 echo ""
@@ -227,33 +181,33 @@ echo ""
 
 # Manually add the public gpg keys
 if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os.gpg --output "$TEMPD/zorin-os.gpg"; then
-    echo "Error: Failed to download Zorin OS public gpg key."
-    exit 1
+  echo "Error: Failed to download Zorin OS public gpg key."
+  exit 1
 fi
 if [ ! -s "$TEMPD/zorin-os.gpg" ]; then
-    echo "Error: Downloaded Zorin OS public gpg key file is empty or missing."
-    exit 1
+  echo "Error: Downloaded Zorin OS public gpg key file is empty or missing."
+  exit 1
 fi
 
 if [ "$version" = "18" ]; then
-    if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium-18.gpg --output "$TEMPD/zorin-os-premium-18.gpg"; then
-        echo "Error: Failed to download premium public gpg key."
-        exit 1
-    fi
-    if [ ! -s "$TEMPD/zorin-os-premium-18.gpg" ]; then
-        echo "Error: Downloaded premium public gpg key file is empty or missing."
-        exit 1
-    fi
+  if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium-18.gpg --output "$TEMPD/zorin-os-premium-18.gpg"; then
+    echo "Error: Failed to download premium public gpg key."
+    exit 1
+  fi
+  if [ ! -s "$TEMPD/zorin-os-premium-18.gpg" ]; then
+    echo "Error: Downloaded premium public gpg key file is empty or missing."
+    exit 1
+  fi
 
 else
-    if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium.gpg --output "$TEMPD/zorin-os-premium.gpg"; then
-        echo "Error: Failed to download premium public gpg key."
-        exit 1
-    fi
-    if [ ! -s "$TEMPD/zorin-os-premium.gpg" ]; then
-        echo "Error: Downloaded premium public gpg key file is empty or missing."
-        exit 1
-    fi
+  if ! curl -L -H 'DNT: 1' -H 'Sec-GPC: 1' https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/raw/zorin-os-premium.gpg --output "$TEMPD/zorin-os-premium.gpg"; then
+    echo "Error: Failed to download premium public gpg key."
+    exit 1
+  fi
+  if [ ! -s "$TEMPD/zorin-os-premium.gpg" ]; then
+    echo "Error: Downloaded premium public gpg key file is empty or missing."
+    exit 1
+  fi
 fi
 
 # Fix permissions of manually downloaded public gpg keys
@@ -261,25 +215,25 @@ fi
 # See: https://chmod-calculator.com/
 sudo chmod 644 "$TEMPD/zorin-os.gpg"
 if [ "$version" = "18" ]; then
-    sudo chmod 644 "$TEMPD/zorin-os-premium-18.gpg"
+  sudo chmod 644 "$TEMPD/zorin-os-premium-18.gpg"
 else
-    sudo chmod 644 "$TEMPD/zorin-os-premium.gpg"
+  sudo chmod 644 "$TEMPD/zorin-os-premium.gpg"
 fi
 
 # Move public gpg keys to trusted.gpg.d
 sudo cp --no-clobber "$TEMPD/zorin-os.gpg" "/etc/apt/trusted.gpg.d/zorin-os.gpg" # --no-clobber to avoid overwriting existing keys
 if [ "$version" = "18" ]; then
-    sudo cp --no-clobber "$TEMPD/zorin-os-premium-18.gpg" "/etc/apt/trusted.gpg.d/zorin-os-premium-18.gpg" # --no-clobber to avoid overwriting existing keys
+  sudo cp --no-clobber "$TEMPD/zorin-os-premium-18.gpg" "/etc/apt/trusted.gpg.d/zorin-os-premium-18.gpg" # --no-clobber to avoid overwriting existing keys
 else
-    sudo cp --no-clobber "$TEMPD/zorin-os-premium.gpg" "/etc/apt/trusted.gpg.d/zorin-os-premium.gpg" # --no-clobber to avoid overwriting existing keys
+  sudo cp --no-clobber "$TEMPD/zorin-os-premium.gpg" "/etc/apt/trusted.gpg.d/zorin-os-premium.gpg" # --no-clobber to avoid overwriting existing keys
 fi
 
 # Fix ownership of public gpg keys
 sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os.gpg
 if [ "$version" = "18" ]; then
-    sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os-premium-18.gpg
+  sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os-premium-18.gpg
 else
-    sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os-premium.gpg
+  sudo chown root:root /etc/apt/trusted.gpg.d/zorin-os-premium.gpg
 fi
 
 echo ""
@@ -291,41 +245,41 @@ echo "Now making and creating & installing dummy debs to satisfy dependencies fo
 echo ""
 
 if dpkg -s "zorin-os-premium-keyring" >/dev/null 2>&1; then
-    echo ""
-    echo "zorin-os-premium-keyring is already installed, skipping dummy deb creation/installation."
-    echo ""
+  echo ""
+  echo "zorin-os-premium-keyring is already installed, skipping dummy deb creation/installation."
+  echo ""
 else
-    if [ "$version" = "18" ]; then
-        bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-premium-keyring -v 1.1 -o "$TEMPD/zorin-os-premium-keyring.deb"
-    else
-        bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-premium-keyring -v 1.0 -o "$TEMPD/zorin-os-premium-keyring.deb"
-    fi
+  if [ "$version" = "18" ]; then
+    bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-premium-keyring -v 1.1 -o "$TEMPD/zorin-os-premium-keyring.deb"
+  else
+    bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-premium-keyring -v 1.0 -o "$TEMPD/zorin-os-premium-keyring.deb"
+  fi
 fi
 
 if dpkg -s "zorin-os-keyring" >/dev/null 2>&1; then
-    echo ""
-    echo "zorin-os-keyring is already installed, skipping dummy deb creation/installation."
-    echo ""
+  echo ""
+  echo "zorin-os-keyring is already installed, skipping dummy deb creation/installation."
+  echo ""
 else
-    bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-keyring -v 1.1 -o "$TEMPD/zorin-os-keyring.deb"
+  bash <(curl -H 'DNT: 1' -H 'Sec-GPC: 1' -fsSL https://github.com/NanashiTheNameless/Zorin-OS-Pro/raw/refs/heads/main/make_dummy_deb.sh) -n zorin-os-keyring -v 1.1 -o "$TEMPD/zorin-os-keyring.deb"
 fi
 
 # Fix permissions of dummy debs if they exist
 # 555 = rwxr-xr-x
 # See: https://chmod-calculator.com/
 if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ]; then
-    sudo chmod 755 "$TEMPD/zorin-os-premium-keyring.deb"
+  sudo chmod 755 "$TEMPD/zorin-os-premium-keyring.deb"
 fi
 if [ -e "$TEMPD/zorin-os-keyring.deb" ]; then
-    sudo chmod 755 "$TEMPD/zorin-os-keyring.deb"
+  sudo chmod 755 "$TEMPD/zorin-os-keyring.deb"
 fi
 
 # Install dummy debs if they exist
 if [ -e "$TEMPD/zorin-os-premium-keyring.deb" ]; then
-    sudo apt-get install "$TEMPD/zorin-os-premium-keyring.deb"
+  sudo apt-get install "$TEMPD/zorin-os-premium-keyring.deb"
 fi
 if [ -e "$TEMPD/zorin-os-keyring.deb" ]; then
-    sudo apt-get install "$TEMPD/zorin-os-keyring.deb"
+  sudo apt-get install "$TEMPD/zorin-os-keyring.deb"
 fi
 
 echo ""
@@ -339,7 +293,7 @@ echo ""
 # Introduce premium user agent
 sudo rm -f /etc/apt/apt.conf.d/99zorin-os-premium-user-agent
 sudo touch /etc/apt/apt.conf.d/99zorin-os-premium-user-agent
-sudo tee /etc/apt/apt.conf.d/99zorin-os-premium-user-agent > /dev/null << 'EOF'
+sudo tee /etc/apt/apt.conf.d/99zorin-os-premium-user-agent >/dev/null <<'EOF'
 Acquire
 {
   http::User-Agent "Zorin OS Premium";
@@ -357,88 +311,88 @@ echo ""
 
 # Update packages
 if ! sudo apt-get update; then
-    echo "Error: Failed to update apt repositories after adding sources."
-    # This should be non-blocking
+  echo "Error: Failed to update apt repositories after adding sources."
+  # This should be non-blocking
 fi
 
 if [ "$version" = "16" ]; then
-    # Install 16 pro content
-    if [ "$extra" = "true" ]; then
-        if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
-            echo "Error: Failed to install APT packages. (16 Extra)"
-            exit 1
-        fi
-        # Install flatpak packages individually to allow user to choose which to install
-        flatpak_packages_16="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.pitivi.Pitivi org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
-        for package in $flatpak_packages_16; do
-            if ! flatpak install flathub ${no_confirm} "$package"; then
-                echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
-            fi
-        done
-    else
-        if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-wallpapers zorin-os-wallpapers-16; then
-            echo "Error: Failed to install APT packages. (16)"
-            exit 1
-        fi
+  # Install 16 pro content
+  if [ "$extra" = "true" ]; then
+    if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
+      echo "Error: Failed to install APT packages. (16 Extra)"
+      exit 1
     fi
+    # Install flatpak packages individually to allow user to choose which to install
+    flatpak_packages_16="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.pitivi.Pitivi org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
+    for package in $flatpak_packages_16; do
+      if ! flatpak install flathub ${no_confirm} "$package"; then
+        echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
+      fi
+    done
+  else
+    if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-wallpapers zorin-os-wallpapers-16; then
+      echo "Error: Failed to install APT packages. (16)"
+      exit 1
+    fi
+  fi
 elif [ "$version" = "17" ]; then
-    # Install 17 pro content
-    if [ "$extra" = "true" ]; then
-        if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-pro-wallpapers-17 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-os-wallpapers-17 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
-            echo "Error: Failed to install APT packages. (17 extra)"
-            exit 1
-        fi
-        # Install flatpak packages individually to allow user to choose which to install
-        flatpak_packages_17="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
-        for package in $flatpak_packages_17; do
-            if ! flatpak install flathub ${no_confirm} "$package"; then
-                echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
-            fi
-        done
-    else
-        if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-pro-wallpapers-17 zorin-os-wallpapers zorin-os-wallpapers-17; then
-            echo "Error: Failed to install packages. (17)"
-            exit 1
-        fi
+  # Install 17 pro content
+  if [ "$extra" = "true" ]; then
+    if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-pro-wallpapers-17 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-os-wallpapers-17 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
+      echo "Error: Failed to install APT packages. (17 extra)"
+      exit 1
     fi
+    # Install flatpak packages individually to allow user to choose which to install
+    flatpak_packages_17="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
+    for package in $flatpak_packages_17; do
+      if ! flatpak install flathub ${no_confirm} "$package"; then
+        echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
+      fi
+    done
+  else
+    if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-pro-wallpapers-17 zorin-os-wallpapers zorin-os-wallpapers-17; then
+      echo "Error: Failed to install packages. (17)"
+      exit 1
+    fi
+  fi
 elif [ "$version" = "18" ]; then
-    # Install 18 pro content
-    if [ "$extra" = "true" ]; then
-        if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-pro-wallpapers-17 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-os-wallpapers-17 zorin-os-wallpapers-18 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
-            echo "Error: Failed to install packages. (18 extra)"
-            exit 1
-        fi
-        # Install flatpak packages individually to allow user to choose which to install
-        flatpak_packages_18="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
-        for package in $flatpak_packages_18; do
-            if ! flatpak install flathub ${no_confirm} "$package"; then
-                echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
-            fi
-        done
-    else
-        if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-wallpapers zorin-os-wallpapers-18; then
-            echo "Error: Failed to install packages. (18)"
-            exit 1
-        fi
+  # Install 18 pro content
+  if [ "$extra" = "true" ]; then
+    if ! sudo apt-get install ${no_confirm} zorin-additional-drivers-checker zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-connect zorin-desktop-session zorin-desktop-themes zorin-exec-guard zorin-exec-guard-app-db zorin-gnome-tour-autostart zorin-icon-themes zorin-os-artwork zorin-os-default-settings zorin-os-docs zorin-os-file-templates zorin-os-keyring zorin-os-minimal zorin-os-overlay zorin-os-premium-keyring zorin-os-printer-test-page zorin-os-pro zorin-os-pro-creative-suite zorin-os-pro-productivity-apps zorin-os-pro-wallpapers zorin-os-pro-wallpapers-16 zorin-os-pro-wallpapers-17 zorin-os-restricted-addons zorin-os-standard zorin-os-tour-video zorin-os-upgrader zorin-os-wallpapers zorin-os-wallpapers-12 zorin-os-wallpapers-15 zorin-os-wallpapers-16 zorin-os-wallpapers-17 zorin-os-wallpapers-18 zorin-sound-theme zorin-windows-app-support-installation-shortcut; then
+      echo "Error: Failed to install packages. (18 extra)"
+      exit 1
     fi
+    # Install flatpak packages individually to allow user to choose which to install
+    flatpak_packages_18="org.nickvision.money com.usebottles.bottles io.github.seadve.Kooha com.rafaelmardojai.Blanket nl.hjdskes.gcolor3 org.ardour.Ardour org.darktable.Darktable org.audacityteam.Audacity org.kde.krita org.gnome.BreakTimer org.gabmus.gfeeds fr.handbrake.ghb com.github.johnfactotum.Foliate org.inkscape.Inkscape com.obsproject.Studio org.mixxx.Mixxx io.github.OpenToonz org.kde.kdenlive org.videolan.VLC com.github.xournalpp.xournalpp net.scribus.Scribus org.blender.Blender"
+    for package in $flatpak_packages_18; do
+      if ! flatpak install flathub ${no_confirm} "$package"; then
+        echo "Warning: Failed to install Flatpak package $package. Continuing with remaining packages..."
+      fi
+    done
+  else
+    if ! sudo apt-get --no-install-recommends install ${no_confirm} zorin-appearance zorin-appearance-layouts-shell-core zorin-appearance-layouts-shell-premium zorin-appearance-layouts-support zorin-auto-theme zorin-icon-themes zorin-os-artwork zorin-os-keyring zorin-os-premium-keyring zorin-os-pro zorin-os-pro-wallpapers zorin-os-wallpapers zorin-os-wallpapers-18; then
+      echo "Error: Failed to install packages. (18)"
+      exit 1
+    fi
+  fi
 else
-    fail
+  fail
 fi
 
 echo ""
 echo "Removing you from the ZorinOS Census system (if enrolled)..."
 echo ""
 
-if ! sudo apt purge ${no_confirm} zorin-os-census ; then
-    echo "Non-Blocking Error: APT failed to uninstall zorin-os-census"
-    echo "(This is not an issue, You may not have been enrolled in the census system in the first place)"
-    # This should be non-blocking
+if ! sudo apt purge ${no_confirm} zorin-os-census; then
+  echo "Non-Blocking Error: APT failed to uninstall zorin-os-census"
+  echo "(This is not an issue, You may not have been enrolled in the census system in the first place)"
+  # This should be non-blocking
 fi
 
-if ! sudo rm -f /root/etc/cron.daily/zorin-os-census /root/etc/cron.hourly/zorin-os-census ; then
-    echo "Non-Blocking Error: Failed to delete ZorinOS Census cron tasks \"/root/etc/cron.daily/zorin-os-census\" and \"/root/etc/cron.hourly/zorin-os-census\""
-    echo "(This is not an issue, You may not have been enrolled in the census system in the first place)"
-    # This should be non-blocking
+if ! sudo rm -f /root/etc/cron.daily/zorin-os-census /root/etc/cron.hourly/zorin-os-census; then
+  echo "Non-Blocking Error: Failed to delete ZorinOS Census cron tasks \"/root/etc/cron.daily/zorin-os-census\" and \"/root/etc/cron.hourly/zorin-os-census\""
+  echo "(This is not an issue, You may not have been enrolled in the census system in the first place)"
+  # This should be non-blocking
 fi
 
 echo ""
